@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import '../env_loader.dart';
 import '../models/transaction.dart';
+import 'session.dart';
 
 enum TransactionType { debit, credit }
 
@@ -12,49 +16,33 @@ extension TransactionTypeX on TransactionType {
 class TransactionService {
   Future<List<Transaction>> fetchTransactions() async {
     try {
-      // Simulate network delay
-      await Future.delayed(const Duration(milliseconds: 400));
-
-      final now = DateTime.now();
-      // Generate a varied list for recent months
-      final List<Transaction> items = List.generate(60, (i) {
-        final date = now.subtract(Duration(days: i));
-        final bool isCredit = i % 3 == 0;
-        final double amount = ((i * 17) % 250 + 10).toDouble();
-        final targets = [
-          'Grocery Mart',
-          'Rent',
-          'Salary',
-          'Coffee Co.',
-          'Gym',
-          'Utilities',
-          'Book Store',
-          'Friend',
-        ];
-        final accounts = [
-          'Checking',
-          'Savings',
-          'Credit Card',
-          'Cash Wallet',
-          'Business',
-        ];
-        return Transaction(
-          id: 'tx_$i',
-          userId: 'user_1',
-          type: isCredit ? 'credit' : 'debit',
-          amount: amount,
-          account: accounts[i % accounts.length],
-          target: targets[i % targets.length],
-          time: DateTime(
-            date.year,
-            date.month,
-            date.day,
-            (i * 3) % 24,
-            (i * 7) % 60,
-          ),
-        );
-      });
-      return items;
+      final baseUrl = await EnvLoader.loadBaseUrl();
+      final txController = await EnvLoader.getController('TransactionController');
+      final getTxAction = await EnvLoader.getAction('GetTransactions');
+      final userId = UserSession.currentUser?.id;
+      if (userId == null || userId.isEmpty) {
+        throw Exception('No logged in user');
+      }
+      final uri = Uri.parse('$baseUrl$txController$getTxAction')
+          .replace(queryParameters: {'userId': userId});
+      final response = await http.get(uri);
+      debugPrint('FetchTransactions response: ${response.statusCode}');
+      debugPrint('FetchTransactions body: ${response.body}');
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is List) {
+          return decoded
+              .map((e) => Transaction.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+        if (decoded is Map<String, dynamic> && decoded['data'] is List) {
+          final list = decoded['data'] as List;
+          return list
+              .map((e) => Transaction.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      return [];
     } catch (e) {
       debugPrint('TransactionService.fetchTransactions error: $e');
       return [];

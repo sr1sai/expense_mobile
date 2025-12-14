@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../Services/auth_service.dart';
+import '../Services/session.dart';
 import '../theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -43,6 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
       // Login successful, fetch user details
       final userResponse = await _authService.getUserById(response.data!);
       if (userResponse.status && userResponse.data != null) {
+        // Save user in session
+        UserSession.currentUser = userResponse.data!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Welcome, ${userResponse.data!.name}!'),
@@ -50,9 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        // TODO: Save user info to provider/state if needed
-        // Navigate to home or next screen
-        context.go('/home');
+        // Navigate to transactions screen
+        context.go('/transactions');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -65,7 +67,11 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(response.message.isNotEmpty ? response.message : 'Invalid email or password'),
+          content: Text(
+            response.message.isNotEmpty
+                ? response.message
+                : 'Invalid email or password',
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),

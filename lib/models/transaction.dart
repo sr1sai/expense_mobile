@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class TransactionDTO {
   final String userId;
   final String type;
@@ -43,20 +41,13 @@ class Transaction extends TransactionDTO {
 
   Transaction({
     required this.id,
-    required String userId,
-    required String type,
-    required double amount,
-    required String account,
-    required String target,
-    required DateTime time,
-  }) : super(
-         userId: userId,
-         type: type,
-         amount: amount,
-         account: account,
-         target: target,
-         time: time,
-       );
+    required super.userId,
+    required super.type,
+    required super.amount,
+    required super.account,
+    required super.target,
+    required super.time,
+  });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(

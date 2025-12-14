@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'Screens/login_screen.dart';
 import 'Screens/register_screen.dart';
+import 'Screens/transactions_screen.dart';
 import 'theme.dart';
 
 /// Main entry point for the application
@@ -67,6 +68,13 @@ class MyApp extends StatelessWidget {
               pageBuilder: (context, state) => NoTransitionPage(
                 child: const MyHomePage(title: 'Dreamflow Starter Project'),
               ),
+            ),
+            // Transactions route
+            GoRoute(
+              path: '/transactions',
+              name: 'transactions',
+              pageBuilder: (context, state) =>
+                  NoTransitionPage(child: const TransactionsScreen()),
             ),
           ],
         ),

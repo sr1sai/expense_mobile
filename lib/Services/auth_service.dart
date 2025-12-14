@@ -20,8 +20,10 @@ class AuthService {
   ) async {
     try {
       final baseUrl = await _getBaseUrl();
+      final userController = await EnvLoader.getController('UserController');
+      final verifyAction = await EnvLoader.getAction('VerifyUser');
       final uri = Uri.parse(
-        '$baseUrl/api/User/IsValidCredentials',
+        '$baseUrl$userController$verifyAction',
       ).replace(queryParameters: {'email': email, 'password': password});
       final response = await http.get(uri);
 
@@ -39,11 +41,13 @@ class AuthService {
     }
   }
 
-  Future<Response<User>> getUserById(String id) async {
+  Future<Response<UserPublicDTO>> getUserById(String id) async {
     try {
       final baseUrl = await _getBaseUrl();
+      final userController = await EnvLoader.getController('UserController');
+      final getUserAction = await EnvLoader.getAction('GetuserById');
       final uri = Uri.parse(
-        '$baseUrl/api/User/GetUserById',
+        '$baseUrl$userController$getUserAction',
       ).replace(queryParameters: {'id': id});
       final response = await http.get(uri);
 
@@ -51,80 +55,50 @@ class AuthService {
       debugPrint('GetUserById response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final data = Response<User>.fromJson(
+        final data = Response<UserPublicDTO>.fromJson(
           jsonDecode(response.body),
-          dataParser: (json) => User.fromJson(json),
+          dataParser: (json) => UserPublicDTO.fromJson(json),
         );
         return data;
       }
-      return Response<User>(status: false, message: 'Failed', data: null);
+      return Response<UserPublicDTO>(
+        status: false,
+        message: 'Failed',
+        data: null,
+      );
     } catch (e) {
       debugPrint('GetUserById error: $e');
-      return Response<User>(status: false, message: e.toString(), data: null);
+      return Response<UserPublicDTO>(
+        status: false,
+        message: e.toString(),
+        data: null,
+      );
     }
   }
-}
 
-class ApiResponse<T> {
-  final bool status;
-  final String message;
-  final T? data;
+  Future<Response<String>> registerUser(UserDTO user) async {
+    try {
+      final baseUrl = await _getBaseUrl();
+      final userController = await EnvLoader.getController('UserController');
+      final registerAction = await EnvLoader.getAction('RegisterUser');
+      final uri = Uri.parse('$baseUrl$userController$registerAction');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(user.toJson()),
+      );
 
-  ApiResponse({
-    required this.status,
-    required this.message,
-    required this.data,
-  });
+      debugPrint('RegisterUser response: ${response.statusCode}');
+      debugPrint('RegisterUser response body: ${response.body}');
 
-  factory ApiResponse.fromJson(
-    Map<String, dynamic> json, {
-    T Function(dynamic)? dataParser,
-  }) {
-    return ApiResponse<T>(
-      status: json['status'] == true,
-      message: json['message'] ?? '',
-      data: dataParser != null && json['data'] != null
-          ? dataParser(json['data'])
-          : json['data'] as T?,
-    );
-  }
-}
-
-class User {
-  final String id;
-  final String name;
-  final String email;
-  final String phoneNumber;
-
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.phoneNumber,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      phoneNumber: json['phoneNumber'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson({
-    bool includePassword = false,
-    String? password,
-  }) {
-    final map = {
-      'id': id,
-      'name': name,
-      'email': email,
-      'phoneNumber': phoneNumber,
-    };
-    if (includePassword && password != null) {
-      map['password'] = password;
+      if (response.statusCode == 200) {
+        final data = Response<String>.fromJson(jsonDecode(response.body));
+        return data;
+      }
+      return Response<String>(status: false, message: 'Failed', data: null);
+    } catch (e) {
+      debugPrint('RegisterUser error: $e');
+      return Response<String>(status: false, message: e.toString(), data: null);
     }
-    return map;
   }
 }

@@ -28,21 +28,21 @@ class UserPublicDTO {
   };
 }
 
-class UsersDTO {
+class UserDTO {
   final String name;
   final String email;
   final String password;
   final String phoneNumber;
 
-  UsersDTO({
+  UserDTO({
     required this.name,
     required this.email,
     required this.password,
     required this.phoneNumber,
   });
 
-  factory UsersDTO.fromJson(Map<String, dynamic> json) {
-    return UsersDTO(
+  factory UserDTO.fromJson(Map<String, dynamic> json) {
+    return UserDTO(
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       password: json['password'] ?? '',
@@ -58,24 +58,19 @@ class UsersDTO {
   };
 }
 
-class Users extends UsersDTO {
+class User extends UserDTO {
   final String id;
 
-  Users({
+  User({
     required this.id,
-    required String name,
-    required String email,
-    required String password,
-    required String phoneNumber,
-  }) : super(
-         name: name,
-         email: email,
-         password: password,
-         phoneNumber: phoneNumber,
-       );
+    required super.name,
+    required super.email,
+    required super.password,
+    required super.phoneNumber,
+  });
 
-  factory Users.fromJson(Map<String, dynamic> json) {
-    return Users(
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',

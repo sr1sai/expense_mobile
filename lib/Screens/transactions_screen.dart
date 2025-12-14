@@ -266,7 +266,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                           ],
                                         ),
                                         const SizedBox(height: 6),
-                                        Row(
+                                        Wrap(
+                                          spacing: 12,
+                                          runSpacing: 6,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
                                           children: [
                                             Icon(
                                               Icons.schedule,
@@ -289,15 +292,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                               color: cs.onSurfaceVariant,
                                             ),
                                             const SizedBox(width: 6),
-                                            Flexible(
-                                              child: Text(
-                                                'ID ${tx.messageId}',
-                                                style: text.labelMedium
-                                                    ?.withColor(
-                                                      cs.onSurfaceVariant,
-                                                    ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
+                                            Text(
+                                              'ID ${tx.messageId}',
+                                              style: text.labelMedium
+                                                  ?.withColor(
+                                                    cs.onSurfaceVariant,
+                                                  ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                             const SizedBox(width: 12),
                                             Icon(
@@ -307,15 +308,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                               color: cs.onSurfaceVariant,
                                             ),
                                             const SizedBox(width: 6),
-                                            Flexible(
-                                              child: Text(
-                                                tx.account,
-                                                style: text.labelMedium
-                                                    ?.withColor(
-                                                      cs.onSurfaceVariant,
-                                                    ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
+                                            Text(
+                                              tx.account,
+                                              style: text.labelMedium
+                                                  ?.withColor(
+                                                    cs.onSurfaceVariant,
+                                                  ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ],
                                         ),

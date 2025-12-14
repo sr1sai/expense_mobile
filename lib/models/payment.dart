@@ -17,8 +17,7 @@ class PaymentDTO {
 class Payment extends PaymentDTO {
   final String id;
 
-  Payment({required this.id, required String userId, required String messageId})
-    : super(userId: userId, messageId: messageId);
+  Payment({required this.id, required super.userId, required super.messageId});
 
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
