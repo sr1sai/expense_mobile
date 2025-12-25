@@ -4,6 +4,7 @@ import 'Screens/login_screen.dart';
 import 'Screens/register_screen.dart';
 import 'Screens/transactions_screen.dart';
 import 'Services/permission_service.dart';
+import 'Services/session.dart';
 import 'theme.dart';
 
 /// Main entry point for the application
@@ -18,6 +19,9 @@ void main() async {
 
   // Request SMS permission at app startup
   await PermissionService.requestSmsPermission();
+
+  // Load user session from SharedPreferences
+  await UserSession.loadUser();
 
   // Initialize the app
   runApp(const MyApp());

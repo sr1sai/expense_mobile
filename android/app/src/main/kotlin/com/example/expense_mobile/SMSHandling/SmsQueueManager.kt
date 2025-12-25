@@ -164,12 +164,13 @@ object SmsQueueManager {
     
     /**
      * Generate unique message ID based on sender, content, and timestamp
-     * Round timestamp to nearest second to handle slight timing differences
+     * Round timestamp to nearest 10 seconds to handle timing differences
+     * between BroadcastReceiver PDU timestamp and database timestamp
      */
     private fun generateMessageId(sender: String, message: String, timestamp: Long): String {
-        // Round timestamp to nearest second (1000ms) to handle timing differences
-        // between BroadcastReceiver PDU timestamp and database timestamp
-        val roundedTimestamp = (timestamp / 1000) * 1000
+        // Round timestamp to nearest 10 seconds (10000ms) to handle significant timing differences
+        // BroadcastReceiver PDU timestamp vs database timestamp can differ by several seconds
+        val roundedTimestamp = (timestamp / 10000) * 10000
         return "$sender:${message.hashCode()}:$roundedTimestamp"
     }
     

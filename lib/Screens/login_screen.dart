@@ -44,8 +44,10 @@ class _LoginScreenState extends State<LoginScreen> {
       // Login successful, fetch user details
       final userResponse = await _authService.getUserById(response.data!);
       if (userResponse.status && userResponse.data != null) {
-        // Save user in session
-        UserSession.currentUser = userResponse.data!;
+        // Save user in session (both in-memory and SharedPreferences for Kotlin access)
+        await UserSession.saveUser(userResponse.data!);
+        if (!mounted) return;
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Welcome, ${userResponse.data!.name}!'),

@@ -101,9 +101,10 @@ class SmsContentObserver(private val context: Context) : ContentObserver(Handler
      * Call this periodically as fallback if ContentObserver doesn't work
      */
     fun checkForNewMessages() {
-        Log.d(TAG, "Manual check for new messages...")
+        // Reduced logging for polling - only log when new message found
         val message = getLatestSms()
         if (message != null) {
+            Log.d(TAG, "✓ New message found via polling - processing...")
             processNewSms(message)
         }
     }
@@ -112,8 +113,7 @@ class SmsContentObserver(private val context: Context) : ContentObserver(Handler
      * Query the SMS inbox for the most recent message
      */
     private fun getLatestSms(): SmsMessage? {
-        Log.d(TAG, "Querying SMS inbox for latest message...")
-        
+        // Reduced logging - only log details when new message found
         var cursor: Cursor? = null
         try {
             val projection = arrayOf(
@@ -141,22 +141,17 @@ class SmsContentObserver(private val context: Context) : ContentObserver(Handler
                 val message = cursor.getString(bodyIndex) ?: ""
                 val timestamp = cursor.getLong(dateIndex)
 
-                Log.d(TAG, "==================== QUERY RESULT ====================")
-                Log.d(TAG, "Sender: $sender")
-                Log.d(TAG, "Message: $message")
-                Log.d(TAG, "Timestamp: $timestamp")
-                Log.d(TAG, "Last processed: $lastProcessedTimestamp")
-
                 // Check if this message is newer than the last processed one
                 if (timestamp > lastProcessedTimestamp) {
+                    Log.d(TAG, "==================== NEW SMS FOUND ====================")
+                    Log.d(TAG, "Sender: $sender")
+                    Log.d(TAG, "Message: ${message.take(50)}${if (message.length > 50) "..." else ""}")
+                    Log.d(TAG, "Timestamp: $timestamp")
                     Log.d(TAG, "✓ New message detected (timestamp: $timestamp > $lastProcessedTimestamp)")
                     lastProcessedTimestamp = timestamp
                     return SmsMessage(sender, message, timestamp)
-                } else {
-                    Log.d(TAG, "⊗ Message already processed (timestamp: $timestamp <= $lastProcessedTimestamp)")
                 }
-            } else {
-                Log.d(TAG, "Cursor is null or empty")
+                // Old message - silently skip (no logs to reduce noise)
             }
         } catch (e: Exception) {
             Log.e(TAG, "==================== ERROR ====================")

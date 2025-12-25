@@ -2,6 +2,8 @@
 <network-security-config>
     <!-- Allow cleartext (HTTP) traffic for development -->
     <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">192.168.1.49</domain>
+        <domain includeSubdomains="true">192.168.1.25</domain>
         <domain includeSubdomains="true">192.168.1.34</domain>
         <domain includeSubdomains="true">192.168.1.43</domain>
         <domain includeSubdomains="true">localhost</domain>

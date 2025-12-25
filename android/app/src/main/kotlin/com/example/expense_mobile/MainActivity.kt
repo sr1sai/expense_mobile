@@ -22,7 +22,7 @@ class MainActivity : FlutterActivity() {
     
     private val pollingRunnable = object : Runnable {
         override fun run() {
-            Log.d("MainActivity", "Polling for new SMS messages...")
+            // Reduced logging - only log when polling starts, not every check
             smsObserver?.checkForNewMessages()
             pollingHandler.postDelayed(this, pollingInterval)
         }

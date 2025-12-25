@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.example.expense_mobile.BuildConfig
 import com.example.expense_mobile.R
 import com.example.expense_mobile.utils.EnvConfig
+import com.example.expense_mobile.utils.SessionManager
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -22,6 +23,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.util.concurrent.TimeUnit
 import org.json.JSONObject
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -110,9 +112,14 @@ class SmsForegroundService : Service() {
             Log.d("SmsForegroundService", "API URL: $apiUrl")
             Log.d("SmsForegroundService", "Debug mode: ${BuildConfig.DEBUG}")
 
-            // Generate a valid UUID for userId (backend expects Guid type)
-            // Using a fixed UUID for "personal-device-001" - can be made dynamic later
-            val userId = "12345678-1234-1234-1234-123456789012" // Valid UUID format
+            // Get userId from SessionManager (logged-in user or device ID)
+            val userId = SessionManager.getUserId(applicationContext)
+            if (userId == null) {
+                Log.e("SmsForegroundService", "Failed to get user ID from session")
+                stopSelf(startId)
+                return
+            }
+            Log.d("SmsForegroundService", "User ID: $userId")
             
             // Convert Unix timestamp (milliseconds) to ISO 8601 DateTime string for C# backend
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
@@ -138,9 +145,20 @@ class SmsForegroundService : Service() {
                 .post(body)
                 .build()
             
+            // Configure timeout based on environment
+            // Production: 5 minutes, Development: No timeout (1 hour)
+            val timeoutMinutes = if (BuildConfig.DEBUG) 60 else 5
+            Log.d("SmsForegroundService", "API timeout: $timeoutMinutes minutes (${if (BuildConfig.DEBUG) "Development" else "Production"})")
+            
+            val client = OkHttpClient.Builder()
+                .connectTimeout(timeoutMinutes.toLong(), TimeUnit.MINUTES)
+                .readTimeout(timeoutMinutes.toLong(), TimeUnit.MINUTES)
+                .writeTimeout(timeoutMinutes.toLong(), TimeUnit.MINUTES)
+                .build()
+            
             Log.d("SmsForegroundService", "Making HTTP POST request...")
 
-            OkHttpClient().newCall(request).enqueue(object : Callback {
+            client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     Log.e("SmsForegroundService", "==================== API FAILURE ====================")
                     Log.e("SmsForegroundService", "API call failed: ${e.message}")
